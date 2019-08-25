@@ -1,4 +1,3 @@
-import org.jetbrains.kotlin.gradle.dsl.KotlinJvmOptions
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 group = "org.gorttar"
@@ -20,6 +19,7 @@ dependencies {
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlinVersion")
     implementation("org.jetbrains.kotlin:kotlin-reflect:$kotlinVersion")
     implementation("org.jetbrains.kotlin:kotlin-script-runtime:$kotlinVersion")
+//    implementation("org.gorttar", "visibility", "1.0-SNAPSHOT")
     testImplementation("org.testng:testng:6.13.1")
 }
 
@@ -37,16 +37,9 @@ tasks {
         targetCompatibility = "1.8"
     }
 
-    kotlinCompile {
-        jvmTarget = "1.8"
-//        freeCompilerArgs = listOf("-XXLanguage:+NewInference")
-    }
+    withType<KotlinCompile> { kotlinOptions.jvmTarget = "1.8" }
 
     wrapper {
         gradleVersion = "5.2.1"
     }
 }
-
-@Suppress("unused")
-val Any?.discard: Unit get() = Unit
-fun TaskContainerScope.kotlinCompile(block: KotlinJvmOptions.() -> Unit) = withType<KotlinCompile> { with(kotlinOptions, block) }.discard
