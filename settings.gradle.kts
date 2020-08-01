@@ -1,3 +1,1 @@
-rootProject.name = "kotlin_start"
-
-include("visibility")
+rootProject.name = "handy_libs"
