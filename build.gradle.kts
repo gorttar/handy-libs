@@ -1,4 +1,4 @@
-group = "org.gorttar"
+group = "com.github.gorttar"
 version = "1.0-SNAPSHOT"
 
 val kotlinGroup = "org.jetbrains.kotlin"

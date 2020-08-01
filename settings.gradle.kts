@@ -1,1 +1,1 @@
-rootProject.name = "handy_libs"
+rootProject.name = "handy-libs"
