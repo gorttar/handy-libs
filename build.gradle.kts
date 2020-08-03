@@ -6,7 +6,7 @@ val publishToCentral = true
 val isRelease = true
 
 group = "com.github.gorttar"
-version = "1.0.0${"".takeIf { isRelease } ?: "-SNAPSHOT"}"
+version = "2.0.0${"".takeIf { isRelease } ?: "-SNAPSHOT"}"
 
 plugins {
     java
