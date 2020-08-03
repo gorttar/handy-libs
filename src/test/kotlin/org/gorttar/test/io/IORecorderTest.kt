@@ -55,6 +55,7 @@ class IORecorderTest {
     }
 
     @Test
+    @Suppress("SpellCheckingInspection")
     fun `recordBytes non empty array`() = IORecorder().run {
         recordBytes("ab".toByteArray(), IN)
         assertThat(chunks).containsExactly(IOOperationChunk(IN, "ab"))
@@ -77,6 +78,7 @@ class IORecorderTest {
     }
 
     @Test
+    @Suppress("SpellCheckingInspection")
     fun `recordBytes off len`() = IORecorder().run {
         recordBytes(bytes = "abcd".toByteArray(), operationType = IN, off = 1, len = 2)
         assertThat(chunks).containsExactly(IOOperationChunk(IN, "bc"))
