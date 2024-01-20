@@ -1,51 +1,52 @@
-val javaLangVersion = "${JavaVersion.VERSION_1_8}"
+val javaLangVersion = "${JavaVersion.VERSION_21}"
 val libName = rootProject.name
 
 val publicationName = "mavenJava"
 val publishToCentral = true
 val isRelease = true
+val jUnitVersion = "5.6.2"
 
 group = "com.github.gorttar"
-version = "2.0.0${"".takeIf { isRelease } ?: "-SNAPSHOT"}"
+version = "2.0.1${"".takeIf { isRelease } ?: "-SNAPSHOT"}"
 
+val kotlinVersion = "1.9.22"
 plugins {
     java
     id("idea")
-    kotlin("jvm") version "1.3.72"
+    kotlin("jvm") version "1.9.22"
     `maven-publish`
     `java-library`
     signing
 }
 
 java {
+    toolchain.languageVersion = JavaLanguageVersion.of(21)
     withJavadocJar()
     withSourcesJar()
 }
 
 repositories {
     mavenCentral()
-    jcenter()
 }
 
 dependencies {
-    implementation(kotlin("stdlib"))
-    implementation(kotlin("reflect"))
-    implementation(kotlin("test"))
-    implementation(group = "com.willowtreeapps.assertk", name = "assertk-jvm", version = "0.20")
+    implementation(kotlin("stdlib", version = kotlinVersion))
+    implementation(kotlin("reflect", version = kotlinVersion))
+    implementation(kotlin("test", version = kotlinVersion))
+    implementation(group = "com.willowtreeapps.assertk", name = "assertk", version = "0.25")
 
-    testImplementation(group = "org.junit.jupiter", name = "junit-jupiter-api", version = "5.6.2")
-    testRuntimeOnly(group = "org.junit.jupiter", name = "junit-jupiter-engine", version = "5.6.2")
-    implementation(kotlin("stdlib-jdk8"))
+    implementation(group = "org.junit.jupiter", name = "junit-jupiter-api", version = jUnitVersion)
+    runtimeOnly(group = "org.junit.jupiter", name = "junit-jupiter-engine", version = jUnitVersion)
+    implementation(kotlin("stdlib-jdk8", version = kotlinVersion))
 }
 
 buildscript {
     repositories {
         mavenCentral()
-        jcenter()
     }
     dependencies {
         classpath(group = "org.junit.jupiter", name = "junit-jupiter-api", version = "5.6.2")
-        classpath(group = "org.jetbrains.kotlin", name = "kotlin-gradle-plugin", version = "1.3.72")
+        classpath(group = "org.jetbrains.kotlin", name = "kotlin-gradle-plugin", version = "1.9.22")
     }
 }
 
@@ -75,6 +76,8 @@ tasks {
 
     wrapper { gradleVersion = "6.5.1" }
 }
+
+val buildDir = layout.buildDirectory
 
 val snapshotUrl = "https://oss.sonatype.org/content/repositories/snapshots"
     .takeIf { publishToCentral }
