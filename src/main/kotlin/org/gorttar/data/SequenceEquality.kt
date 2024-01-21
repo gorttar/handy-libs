@@ -1,8 +1,9 @@
 package org.gorttar.data
 
-infix fun Sequence<*>.eq(ySequence: Sequence<*>): Boolean {
-    val xs = iterator()
-    val ys = ySequence.iterator()
-    while (xs.hasNext() || ys.hasNext()) if (!xs.hasNext() || !ys.hasNext() || xs.next() != ys.next()) return false
-    return true
-}
+private val nil = Any()
+
+infix fun Sequence<*>.eq(ySequence: Sequence<*>): Boolean = listOf(this, ySequence)
+    .map { it + generateSequence { nil } }
+    .let { (xs, ys) -> xs zip ys }
+    .takeWhile { it != Pair(nil, nil) }
+    .all { (x, y) -> x == y }

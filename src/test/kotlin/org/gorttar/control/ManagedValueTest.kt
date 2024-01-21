@@ -78,7 +78,7 @@ class ManagedValueTest {
 
     @Test
     fun `test 'coManaged' extension`() {
-        managed(::x).coManaged(::y).on(changedX.`+`(changedY)) { (x1, y1) ->
+        managed(::x).coManaged(::y).on(HNil[changedX] + changedY) { (x1, y1) ->
             assertThat(x1).isEqualTo(initialX)
             assertThat(y1).isEqualTo(initialY)
             assertThat(x).isEqualTo(changedX)
@@ -90,7 +90,7 @@ class ManagedValueTest {
 
     @Test
     fun `test 'coManagedN' extension`() {
-        managed(::x).coManaged(::y).coManaged(::z).on(changedX.`+`(changedY) + changedZ) { (x1, y1, z1) ->
+        managed(::x).coManaged(::y).coManaged(::z).on(HNil[changedX] + changedY + changedZ) { (x1, y1, z1) ->
             assertThat(x1).isEqualTo(initialX)
             assertThat(y1).isEqualTo(initialY)
             assertThat(z1).isEqualTo(initialZ)

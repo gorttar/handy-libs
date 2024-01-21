@@ -1,6 +1,7 @@
 package org.gorttar.control
 
 import org.gorttar.data.heterogeneous.list.*
+import java.io.Closeable
 import kotlin.reflect.KMutableProperty0
 
 class ManagedValue<V>(
@@ -16,7 +17,7 @@ fun <A> managed(aProp: KMutableProperty0<A>): ManagedValue<A> = managed(aProp::g
 inline fun <A, B> ManagedValue<A>.coManaged(
     crossinline getB: () -> B,
     crossinline setB: (B) -> Unit
-): ManagedValue<HList2<A, B>> = managed({ get().`+`(getB()) }) {
+): ManagedValue<HList2<A, B>> = managed({ HNil[get()] + getB() }) {
     set(it.head.tail)
     setB(it.tail)
 }
@@ -40,11 +41,9 @@ fun <L : HList<L>, B> ManagedValue<L>.coManaged(
 ): ManagedValue<HCons<L, B>> = coManaged(bProp::get, bProp::set)
 
 inline fun <T, R> ManagedValue<T>.on(t: T, block: (old: T) -> R): R = get().let {
-    try {
+    Closeable { set(it) }.use { _ ->
         set(t)
         block(it)
-    } finally {
-        set(it)
     }
 }
 
