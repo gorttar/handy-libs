@@ -9,6 +9,8 @@ import assertk.assertions.isEqualTo
 import org.gorttar.test.dynamicTests
 import org.junit.jupiter.api.TestFactory
 
+// @formatter:off
+
 class ExtensionPropertiesKtTest {
     @TestFactory
     fun a() = dynamicTests(
@@ -197,3 +199,5 @@ class ExtensionPropertiesKtTest {
 
     private data class Case<XS : HList<XS>, A>(val xs: XS, val actual: A)
 }
+
+// @formatter:on

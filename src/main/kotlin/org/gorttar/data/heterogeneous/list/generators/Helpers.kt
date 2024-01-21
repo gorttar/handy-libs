@@ -1,5 +1,8 @@
 package org.gorttar.data.heterogeneous.list.generators
 
+import org.gorttar.data.heterogeneous.list.HCons
+import org.gorttar.data.heterogeneous.list.HNil
+import org.gorttar.data.heterogeneous.list.requireSimpleName
 import java.io.FileOutputStream
 import java.io.PrintStream
 import kotlin.reflect.jvm.javaField
@@ -13,12 +16,17 @@ internal const val maxPropName: PropName = 'z'
 internal val maxPropNumber: Int = maxPropName.number
 
 internal val packagePath: String by lazy { packageName.replace('.', '/') }
-internal val PropName.typeName: TypeName get() = toUpperCase()
+internal val PropName.typeName: TypeName get() = uppercaseChar()
 
 internal val PropName.number: Int get() = this - minPropName + 1
 internal val PropName.ordinalStr: String get() = "$number".let { "$it${lastDigitsToOrdinalSuffix[it.takeLast(2)] ?: "th"}" }
 
 internal const val buck: String = "$"
+
+internal val hConsTypeName: String = HCons::class.requireSimpleName()
+internal val hNilTypeName: String = HNil::class.requireSimpleName()
+internal val headPropName: String = HCons<*, *>::head.name
+internal val tailPropName: String = HCons<*, *>::tail.name
 
 internal fun writeMainSrc(
     srcName: String,

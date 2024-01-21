@@ -1,20 +1,30 @@
 package org.gorttar.data.heterogeneous.list.generators
 
-fun main(): Unit = writeMainSrc(
+import org.gorttar.data.heterogeneous.list.hListTypeName
+
+fun main(): Unit = generateAliases()
+
+internal fun generateAliases(): Unit = writeMainSrc(
     srcName = "Aliases",
-    content = """
-    |typealias HList1<A> =
-    |    HCons<HNil, A>
+    content =
+    """
+    |// @formatter:off
     |
-    |${(minPropName + 1..maxPropName).joinToString("\n\n") {
-        val lastType = it.typeName
-        val prevTypes = (minPropName.typeName until lastType).joinToString()
-        """
-        |typealias HList${it.number}<$prevTypes, $lastType> =
-        |    HCons<HList${it.number - 1}<$prevTypes>, $lastType>
-        """.trimMargin()
-    }}
-    """.trimMargin()
+    |typealias ${hListTypeName}1<A> =
+    |        $hConsTypeName<$hNilTypeName, A>
+    |
+    |${
+        (minPropName + 1..maxPropName).joinToString("\n\n") {
+            val lastType = it.typeName
+            val prevTypes = (minPropName.typeName until lastType).joinToString()
+            """
+            |typealias $hListTypeName${it.number}<$prevTypes, $lastType> =
+            |        $hConsTypeName<$hListTypeName${it.number - 1}<$prevTypes>, $lastType>
+            """.trimMargin()
+        }
+    }
+    |
+    |// @formatter:on
+    |
+    |""".trimMargin()
 )
-
-

@@ -1,30 +1,43 @@
 package org.gorttar.data.heterogeneous.list.generators
 
+import org.gorttar.data.heterogeneous.list.hListTypeName
 import org.junit.jupiter.api.TestFactory
 
 private const val testClassName = "ExtensionPropertiesKtTest"
+private val testFactoryKClass = TestFactory::class
 
-fun main(): Unit = writeTestSrc(
+fun main(): Unit = generateExtensionPropertiesTest()
+
+internal fun generateExtensionPropertiesTest(): Unit = writeTestSrc(
     testClassName,
     """
     |import assertk.assertThat
     |import assertk.assertions.isEqualTo
     |import org.gorttar.test.dynamicTests
-    |import ${TestFactory::class.qualifiedName}
+    |import ${testFactoryKClass.qualifiedName}
+    |
+    |// @formatter:off
     |
     |class $testClassName {
-    |${(minPropName..maxPropName).joinToString("\n\n") { propName ->
-        """
-        |    @TestFactory
-        |    fun $propName() = dynamicTests(
-        |${(propName.number..maxPropNumber).asSequence().map {
-            "Case(xs$it, xs$it.$propName)"
-        }.chunked(5) { it.joinToString() }.joinToString(",\n") { "        $it" }}
-        |    ) { assertThat(actual, "${propName.ordinalStr} value in ${buck}xs").isEqualTo($propName) }
-        """.trimMargin()
-    }}
+    |${
+            (minPropName..maxPropName).joinToString("\n\n") { propName ->
+                """
+                |    @${testFactoryKClass.simpleName}
+                |    fun $propName() = dynamicTests(
+                |${
+                        (propName.number..maxPropNumber).asSequence().map {
+                            "Case(xs$it, xs$it.$propName)"
+                        }.chunked(5) { it.joinToString() }.joinToString(",\n") { "        $it" }
+                    }
+                |    ) { assertThat(actual, "${propName.ordinalStr} value in ${buck}xs").isEqualTo($propName) }
+                """.trimMargin()
+            }
+        }
     |
-    |    private data class Case<XS : HList<XS>, A>(val xs: XS, val actual: A)
+    |    private data class Case<XS : $hListTypeName<XS>, A>(val xs: XS, val actual: A)
     |}
-    """.trimMargin()
+    |
+    |// @formatter:on
+    |
+    |""".trimMargin()
 )

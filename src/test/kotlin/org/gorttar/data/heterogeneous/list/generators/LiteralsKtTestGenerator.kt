@@ -3,30 +3,40 @@ package org.gorttar.data.heterogeneous.list.generators
 import org.junit.jupiter.api.Test
 
 private const val testClassName = "LiteralsKtTest"
+private val testKClass = Test::class
 
-fun main(): Unit = writeTestSrc(
+fun main(): Unit = generateLiteralsTest()
+
+internal fun generateLiteralsTest(): Unit = writeTestSrc(
     testClassName,
     """
     |import assertk.assertThat
     |import assertk.assertions.isEqualTo
     |import assertk.assertions.isSameAs
-    |import ${Test::class.qualifiedName}
+    |import ${testKClass.qualifiedName}
+    |
+    |// @formatter:off
     |
     |class $testClassName {
-    |    @Test
+    |    @${testKClass.simpleName}
     |    fun `0 args literal`() = assertThat(
     |        hListOf()
     |    ).isSameAs(xs0)
     |
-    |${(minPropName..maxPropName).joinToString("\n\n") { lastPropName ->
-        val lastPropNumber = lastPropName.number
-        """
-        |    @Test
-        |    fun `$lastPropNumber  args literal`() = assertThat(
-        |        hListOf(${(minPropName..lastPropName).joinToString()})
-        |    ).isEqualTo(xs$lastPropNumber)
-        """.trimMargin()
-    }}
+    |${
+            (minPropName..maxPropName).joinToString("\n\n") { lastPropName ->
+                val lastPropNumber = lastPropName.number
+                """
+                |    @${testKClass.simpleName}
+                |    fun `$lastPropNumber  args literal`() = assertThat(
+                |        hListOf(${(minPropName..lastPropName).joinToString()})
+                |    ).isEqualTo(xs$lastPropNumber)
+                """.trimMargin()
+            }
+        }
     |}
-    """.trimMargin()
+    |
+    |// @formatter:on
+    |
+    |""".trimMargin()
 )

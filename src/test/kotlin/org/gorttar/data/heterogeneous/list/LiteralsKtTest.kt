@@ -9,6 +9,8 @@ import assertk.assertions.isEqualTo
 import assertk.assertions.isSameAs
 import org.junit.jupiter.api.Test
 
+// @formatter:off
+
 class LiteralsKtTest {
     @Test
     fun `0 args literal`() = assertThat(
@@ -145,3 +147,5 @@ class LiteralsKtTest {
         hListOf(a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t, u, v, w, x, y, z)
     ).isEqualTo(xs26)
 }
+
+// @formatter:on

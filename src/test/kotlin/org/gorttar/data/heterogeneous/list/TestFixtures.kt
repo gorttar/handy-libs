@@ -7,6 +7,8 @@ package org.gorttar.data.heterogeneous.list
 import java.math.BigDecimal
 import java.math.BigInteger
 
+// @formatter:off
+
 internal const val a = 0.toByte()
 internal const val b = 1.toShort()
 internal const val c = 2.toLong()
@@ -38,7 +40,7 @@ internal val xs26: HList26<
     Byte, Short, Long, Int, Char, BigInteger, Double, Float, BigDecimal,
     String, List<Byte>, List<Short>, List<Long>, List<Int>, List<Char>, List<BigInteger>, List<Double>, List<Float>,
     List<BigDecimal>, List<String>, Set<Byte>, Set<Short>, Set<Long>, Set<Int>, Set<Char>, Set<BigInteger>
-        > = HNil[a] + b + c + d + e + f + g + h + i + j + k + l + m + n + o + p + q + r + s + t + u + v + w + x + y + z
+    > = HNil[a] + b + c + d + e + f + g + h + i + j + k + l + m + n + o + p + q + r + s + t + u + v + w + x + y + z
 internal val xs25 = xs26.head
 internal val xs24 = xs25.head
 internal val xs23 = xs24.head
@@ -65,3 +67,5 @@ internal val xs3 = xs4.head
 internal val xs2 = xs3.head
 internal val xs1 = xs2.head
 internal val xs0 = xs1.head
+
+// @formatter:on
