@@ -21,8 +21,6 @@ internal val PropName.typeName: TypeName get() = uppercaseChar()
 internal val PropName.number: Int get() = this - minPropName + 1
 internal val PropName.ordinalStr: String get() = "$number".let { "$it${lastDigitsToOrdinalSuffix[it.takeLast(2)] ?: "th"}" }
 
-internal const val buck: String = "$"
-
 internal val hConsTypeName: String = HCons::class.requireSimpleName()
 internal val hNilTypeName: String = HNil::class.requireSimpleName()
 internal val headPropName: String = HCons<*, *>::head.name

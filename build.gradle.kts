@@ -74,7 +74,7 @@ tasks {
         }
     }
 
-    wrapper { gradleVersion = "6.5.1" }
+    wrapper { gradleVersion = "8.5" }
 }
 
 val buildDir = layout.buildDirectory

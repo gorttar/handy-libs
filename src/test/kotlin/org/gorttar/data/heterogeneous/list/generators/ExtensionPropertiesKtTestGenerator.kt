@@ -2,6 +2,7 @@ package org.gorttar.data.heterogeneous.list.generators
 
 import org.gorttar.data.heterogeneous.list.hListTypeName
 import org.junit.jupiter.api.TestFactory
+import kotlin.text.Typography.dollar
 
 private const val testClassName = "ExtensionPropertiesKtTest"
 private val testFactoryKClass = TestFactory::class
@@ -29,7 +30,7 @@ internal fun generateExtensionPropertiesTest(): Unit = writeTestSrc(
                             "Case(xs$it, xs$it.$propName)"
                         }.chunked(5) { it.joinToString() }.joinToString(",\n") { "        $it" }
                     }
-                |    ) { assertThat(actual, "${propName.ordinalStr} value in ${buck}xs").isEqualTo($propName) }
+                |    ) { assertThat(actual, "${propName.ordinalStr} value in ${dollar}xs").isEqualTo($propName) }
                 """.trimMargin()
             }
         }

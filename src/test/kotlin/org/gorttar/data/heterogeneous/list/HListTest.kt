@@ -2,9 +2,7 @@ package org.gorttar.data.heterogeneous.list
 
 import assertk.assertAll
 import assertk.assertThat
-import assertk.assertions.isEqualTo
-import assertk.assertions.isNotSameAs
-import assertk.assertions.isSameAs
+import assertk.assertions.*
 import org.gorttar.test.dynamicTests
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestFactory
@@ -41,11 +39,20 @@ class HListTest {
 
     @Test
     fun `copy the same`(): Unit = assertThat(xs26.copy()).isSameAs(xs26)
+
+    @Test
+    fun `rawList HNil`(): Unit = assertThat(HNil.rawList).isEmpty()
+
+    @Test
+    fun `rawList simple case`(): Unit = assertThat(xs2.rawList).containsExactly(a, b)
+
+    @Test
+    fun `rawList branch case`(): Unit = assertThat(xs1[c].rawList).containsExactly(a, c)
 }
 
 private val xs26Expected: HList26<
-    Byte, Short, Long, Int, Char, BigInteger, Double, Float, BigDecimal,
-    String, List<Byte>, List<Short>, List<Long>, List<Int>, List<Char>, List<BigInteger>, List<Double>, List<Float>,
-    List<BigDecimal>, List<String>, Set<Byte>, Set<Short>, Set<Long>, Set<Int>, Set<Char>, Set<BigInteger>
+        Byte, Short, Long, Int, Char, BigInteger, Double, Float, BigDecimal,
+        String, List<Byte>, List<Short>, List<Long>, List<Int>, List<Char>, List<BigInteger>, List<Double>, List<Float>,
+        List<BigDecimal>, List<String>, Set<Byte>, Set<Short>, Set<Long>, Set<Int>, Set<Char>, Set<BigInteger>
         > = HNil[a] + b + c + d + e + f + g + h + i + j + k + l + m + n + o + p + q + r + s + t + u + v + w + x + y + z
 
