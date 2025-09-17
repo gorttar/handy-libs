@@ -1,19 +1,20 @@
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+
 val javaLangVersion = "${JavaVersion.VERSION_21}"
 val libName = rootProject.name
 
 val publicationName = "mavenJava"
 val publishToCentral = true
 val isRelease = true
-val jUnitVersion = "5.6.2"
+val jUnitVersion = "5.13.4"
 
 group = "com.github.gorttar"
 version = "2.0.1${"".takeIf { isRelease } ?: "-SNAPSHOT"}"
 
-val kotlinVersion = "1.9.22"
 plugins {
     java
     id("idea")
-    kotlin("jvm") version "1.9.22"
+    kotlin("jvm") version "2.1.21"
     `maven-publish`
     `java-library`
     signing
@@ -30,14 +31,12 @@ repositories {
 }
 
 dependencies {
-    implementation(kotlin("stdlib", version = kotlinVersion))
-    implementation(kotlin("reflect", version = kotlinVersion))
-    implementation(kotlin("test", version = kotlinVersion))
-    implementation(group = "com.willowtreeapps.assertk", name = "assertk", version = "0.25")
+    implementation(kotlin("reflect"))
+    implementation(kotlin("test"))
+    implementation(group = "com.willowtreeapps.assertk", name = "assertk", version = "0.28.1")
 
     implementation(group = "org.junit.jupiter", name = "junit-jupiter-api", version = jUnitVersion)
     runtimeOnly(group = "org.junit.jupiter", name = "junit-jupiter-engine", version = jUnitVersion)
-    implementation(kotlin("stdlib-jdk8", version = kotlinVersion))
 }
 
 buildscript {
@@ -62,8 +61,8 @@ tasks {
 
     listOf(compileKotlin, compileTestKotlin).forEach {
         it {
-            kotlinOptions {
-                jvmTarget = javaLangVersion
+            kotlin {
+                compilerOptions.jvmTarget = JvmTarget.fromTarget(javaLangVersion)
             }
         }
     }
