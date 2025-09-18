@@ -9,6 +9,8 @@ import org.gorttar.data.heterogeneous.list.hListOf
 import java.io.PrintStream
 import java.util.concurrent.atomic.AtomicBoolean
 
+/** API section */
+
 /**
  * Temporarily overrides [System.out] with [IndentedPrintStream]
  * which prepends [indent] to each line passed from [block] to [System.out] [print] or [println]
@@ -17,7 +19,7 @@ import java.util.concurrent.atomic.AtomicBoolean
 inline fun <T> withIndent(
     indent: String = defaultIndent,
     block: () -> T
-): T = managed(System::out, System::setOut).onTransform({ IndentedPrintStream(indent, it) }) { block() }
+): T = managed(System::out, System::setOut).onTransform({ IndentedPrintStream(indent, it) }) { _, _ -> block() }
 
 /**
  * Temporarily overrides [System.err] with [IndentedPrintStream]
@@ -27,7 +29,7 @@ inline fun <T> withIndent(
 inline fun <T> withErrIndent(
     indent: String = defaultIndent,
     block: () -> T
-): T = managed(System::err, System::setErr).onTransform({ IndentedPrintStream(indent, it) }) { block() }
+): T = managed(System::err, System::setErr).onTransform({ IndentedPrintStream(indent, it) }) { _, _ -> block() }
 
 /**
  * Temporarily overrides [System.out] and [System.err] with [IndentedPrintStream]
@@ -37,9 +39,11 @@ inline fun <T> withErrIndent(
 inline fun <T> withIndentConsole(
     indent: String = defaultIndent,
     block: () -> T
-): T = managed(System::out, System::setOut).coManaged(System::err, System::setErr).onTransform({ (out, err) ->
+): T = coManaged(System::out, System::setOut).coManaged(System::err, System::setErr).onTransform({ (out, err) ->
     hListOf(IndentedPrintStream(indent, out), IndentedPrintStream(indent, err))
-}) { block() }
+}) { _, _ -> block() }
+
+/** implementation section */
 
 @PublishedApi
 internal class IndentedPrintStream(
