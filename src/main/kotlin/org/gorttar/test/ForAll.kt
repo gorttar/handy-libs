@@ -3,6 +3,7 @@ package org.gorttar.test
 import org.gorttar.data.heterogeneous.list.HCons
 import org.gorttar.data.heterogeneous.list.HList
 import org.gorttar.data.heterogeneous.list.HNil
+import org.gorttar.data.heterogeneous.list.plus
 import org.junit.jupiter.api.DynamicContainer
 import org.junit.jupiter.api.DynamicContainer.dynamicContainer
 import org.junit.jupiter.api.DynamicTest.dynamicTest
@@ -11,16 +12,38 @@ import java.math.BigInteger
 import kotlin.reflect.KCallable
 import kotlin.text.Typography.nbsp
 
-data class Row<out Data, out Expected>(val data: Data, val expected: Expected)
-
-open class HeaderBuilder private constructor(private val cells: List<String>) {
-    companion object : HeaderBuilder(emptyList()) {
-        operator fun HeaderBuilder.get(next: String): HeaderBuilder = HeaderBuilder(cells + next)
-        operator fun HeaderBuilder.div(expected: HeaderBuilder): Head = Row(cells, expected.cells)
+@JvmInline
+value class Data<out D> private constructor(val d: D) {
+    companion object {
+        operator fun Data<List<String>>.get(next: String): Data<List<String>> = Data(d + next)
+        operator fun <L : HList<L>, A> Data<L>.get(a: A): Data<HCons<L, A>> = Data(d + a)
+        val hData: Data<List<String>> = Data(emptyList())
+        val data: Data<HNil> = Data(HNil)
     }
 }
 
-typealias NERow<Data, D, Expected, E> = Row<HCons<Data, D>, HCons<Expected, E>>
+
+@JvmInline
+value class Expected<out E> private constructor(val e: E) {
+    companion object {
+        operator fun Expected<List<String>>.get(next: String): Expected<List<String>> = Expected(e + next)
+        operator fun <L : HList<L>, A> Expected<L>.get(a: A): Expected<HCons<L, A>> = Expected(e + a)
+        val hExpect: Expected<List<String>> = Expected(emptyList())
+        val expect: Expected<HNil> = Expected(HNil)
+    }
+}
+
+
+class Row<out D, out E> private constructor(val data: Data<D>, val expected: Expected<E>) {
+    companion object {
+        @JvmName("hDiv")
+        operator fun Data<List<String>>.div(expected: Expected<List<String>>): Head = Row(this, expected)
+        operator fun <AL : HList<AL>, BL : HList<BL>> Data<AL>.div(expected: Expected<BL>): Row<AL, BL> =
+            Row(this, expected)
+    }
+}
+
+typealias NERow<DL, D, EL, E> = Row<HCons<DL, D>, HCons<EL, E>>
 typealias Head = Row<List<String>, List<String>>
 
 val Any?.str: String
@@ -35,32 +58,22 @@ val Any?.str: String
         else -> "$this"
     }
 
-val hData: HeaderBuilder = HeaderBuilder
-val hExpect: HeaderBuilder = hData
-val data: HNil = HNil
-val expect: HNil = HNil
-
-operator fun <AL : HList<AL>, BL : HList<BL>> AL.div(bl: BL): Row<AL, BL> = Row(this, bl)
-
-fun <Data, D, Expected, E> forAll(
+inline fun <DL, D, EL, E> forAll(
     head: Head,
-    vararg rows: NERow<Data, D, Expected, E>,
-    test: (data: HCons<Data, D>, expected: HCons<Expected, E>) -> Unit
+    vararg rows: NERow<DL, D, EL, E>,
+    crossinline test: (data: HCons<DL, D>, expected: HCons<EL, E>) -> Unit
 ): Iterable<DynamicContainer>
-        where Data : HList<Data>, Expected : HList<Expected> {
+        where DL : HList<DL>, EL : HList<EL> {
     validateTestData(head, rows)
     val (dataPadEnds, expectPadEnds) = (
             rows.asSequence()
-                .map { it.data.rawList to it.expected.rawList } + (head.data to head.expected)
+                .map { it.data.d.rawList to it.expected.e.rawList } + (head.data.d to head.expected.e)
             )
         .map { (d, e) -> d.map { it.str.length } to e.map { it.str.length } }
         .fold(
-            MutableList(head.data.size) { 0 } to MutableList(head.expected.size) { 0 }
+            MutableList(head.data.d.size) { 0 } to MutableList(head.expected.e.size) { 0 }
         ) { acc, (dataLengths, expectLengths) ->
             acc.also { (dataPadEnds, expectPadEnds) ->
-                fun List<Int>.updatePadEnds(padEnds: MutableList<Int>) = forEachIndexed { idx, len ->
-                    padEnds[idx] = maxOf(padEnds[idx], len)
-                }
                 dataLengths.updatePadEnds(dataPadEnds)
                 expectLengths.updatePadEnds(expectPadEnds)
             }
@@ -70,25 +83,33 @@ fun <Data, D, Expected, E> forAll(
             "$nbsp$nbsp${head.showHead(dataPadEnds to expectPadEnds)}",
             rows
                 .map {
-                    dynamicTest(it.show(dataPadEnds to expectPadEnds)) { test(it.data, it.expected) }
+                    dynamicTest(it.show(dataPadEnds to expectPadEnds)) { test(it.data.d, it.expected.e) }
                 }
         )
     )
-//    return (sequenceOf(dynamicTest(head.showHead(dataPadEnds to expectPadEnds)) {}) +
-//            rows.asSequence()
-//                .map { dynamicTest(it.show(dataPadEnds to expectPadEnds)) { test(it.data, it.expected) } }
-//            )
-//        .iterator()
 }
 
-private fun <D, Data, E, Expected> validateTestData(
+inline fun <DL, D, EL, E> forAll(
+    crossinline test: (data: HCons<DL, D>, expected: HCons<EL, E>) -> Unit,
+    head: Head,
+    vararg rows: NERow<DL, D, EL, E>
+): Iterable<DynamicContainer>
+        where DL : HList<DL>, EL : HList<EL> = forAll(head, rows = rows, test)
+
+@PublishedApi
+internal fun List<Int>.updatePadEnds(padEnds: MutableList<Int>) = forEachIndexed { idx, len ->
+    padEnds[idx] = maxOf(padEnds[idx], len)
+}
+
+@PublishedApi
+internal fun <D, Data, E, Expected> validateTestData(
     head: Head,
     rows: Array<out NERow<Data, D, Expected, E>>
 ) where Data : HList<Data>, Expected : HList<Expected> {
-    val dataSize = head.data.size
-    val expectSize = head.expected.size
+    val dataSize = head.data.d.size
+    val expectSize = head.expected.e.size
     rows
-        .filter { it.data.size != dataSize || it.expected.size != expectSize }
+        .filter { it.data.d.size != dataSize || it.expected.e.size != expectSize }
         .takeUnless { it.isEmpty() }
         ?.let { failures ->
             error(
@@ -108,13 +129,15 @@ private fun <D, Data, E, Expected> validateTestData(
 
 private fun List<*>.show(padEnds: List<Int>): String = asSequence()
     .zip(padEnds.asSequence() + generateSequence { 0 }) { a, padEnd -> a.str.padEnd(padEnd, nbsp) }
-    .joinToString("|")
+    .joinToString(" | ")
 
-private fun NERow<*, *, *, *>.show(padEnds: Pair<List<Int>, List<Int>>): String =
-    "${data.rawList.show(padEnds.first)}||${expected.rawList.show(padEnds.second)}"
+@PublishedApi
+internal fun NERow<*, *, *, *>.show(padEnds: Pair<List<Int>, List<Int>>): String =
+    "${data.d.rawList.show(padEnds.first)} || ${expected.e.rawList.show(padEnds.second)}"
 
-private fun Head.showHead(padEnds: Pair<List<Int>, List<Int>>): String =
-    "${data.show(padEnds.first)}||${expected.show(padEnds.second)}"
+@PublishedApi
+internal fun Head.showHead(padEnds: Pair<List<Int>, List<Int>>): String =
+    "${data.d.show(padEnds.first)} || ${expected.e.show(padEnds.second)}"
 
 private fun alignNames(first: KCallable<*>, second: KCallable<*>): Pair<String, String> = (first.name to second.name)
     .let { (f, s) ->
@@ -129,11 +152,11 @@ private object Names {
     val hExpect: String
 
     init {
-        val (data, hData) = alignNames(Names::data, Names::hData)
-        val (expect, hExpect) = alignNames(Names::expect, Names::hExpect)
-        Names.data = data
-        Names.expect = expect
-        Names.hData = hData
-        Names.hExpect = hExpect
+        val (data, hData) = alignNames(::data, ::hData)
+        val (expect, hExpect) = alignNames(::expect, ::hExpect)
+        this.data = data
+        this.expect = expect
+        this.hData = hData
+        this.hExpect = hExpect
     }
 }

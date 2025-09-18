@@ -2,23 +2,15 @@
 
 package org.gorttar.data.heterogeneous.list
 
-import java.util.*
-import kotlin.collections.AbstractList
+import java.util.Objects.checkIndex
 import kotlin.reflect.KClass
 
 /**
- * left sub listed heterogeneous list.
- * Left sub listed means that
- * *    values are stored in [HCons.tail] (right part) while consecutive sub lists in [HCons.head] (left part)
- * *    It's more convenient from usage perspective than right sub listed heterogeneous list
- * *    because operators and infix functions in Kotlin are grouped from left to right.
- * *    For example a + b + c + d actually means ((a + b) + c) + d
- * *    so left sub listing can eliminate brackets in list construction expressions
- * Heterogeneous means that list preserves types of its elements in full type signature
+ * Heterogeneous list that preserves types of its elements in full type signature
  * [L] - full type of list
  */
 sealed class HList<out L : HList<L>> {
-    abstract val size: Int
+    val size: Int get() = rawList.size
     abstract val rawList: List<Any?>
 
     override fun equals(other: Any?): Boolean = this === other || other is HList<*> && rawList == other.rawList
@@ -30,7 +22,6 @@ sealed class HList<out L : HList<L>> {
  * Empty [HList]
  */
 object HNil : HList<HNil>() {
-    override val size: Int = 0
     override val rawList: List<Any?> = emptyList()
 }
 
@@ -43,7 +34,7 @@ private class ListView<out T>(
 
     override val size: Int = lastIndex.toIndex() + 1
     override fun get(index: Int): T = index.toIndex().let {
-        Objects.checkIndex(it, size)
+        checkIndex(it, size)
         delegate[it]
     }
 }
@@ -62,7 +53,12 @@ private class ChunkedList<T>(
 }
 
 /**
- * [HList] node constructor
+ * [HList] left sub listed node constructor
+ * *    values are stored in [HCons.tail] (right part) while consecutive sub lists in [HCons.head] (left part)
+ * *    It's more convenient from usage perspective than right sub listed heterogeneous list
+ * *    because operators and infix functions in Kotlin are grouped from left to right.
+ * *    For example a + b + c + d actually means ((a + b) + c) + d
+ * *    so left sub listing can eliminate brackets in list construction expressions
  * [head] - consecutive sub list
  * [tail] - node value
  */
@@ -79,8 +75,7 @@ class HCons<out L : HList<L>, out A>(val head: L, tail: A) : HList<HCons<L, A>>(
     override val rawList: List<Any?> = ListView(_chunk)
 
     @Suppress("UNCHECKED_CAST")
-    val tail: A = rawList.last() as A
-    override val size: Int = head.size + 1
+    val tail: A get() = rawList.last() as A
 }
 
 fun <L : HList<L>, A> HCons<L, *>.copy(tail: A): HCons<L, A> = HCons(head, tail)
@@ -93,11 +88,6 @@ fun <L : HList<L>, A> HCons<L, A>.copy(): HCons<L, A> = this
  * creates [HList] by appending [a] to [this]
  */
 inline operator fun <L : HList<L>, A> L.plus(a: A): HCons<L, A> = HCons(this, a)
-
-/**
- * creates [HList] by appending [a] to [this]
- */
-operator fun <L : HList<L>, A> L.get(a: A): HCons<L, A> = this + a
 
 internal fun KClass<*>.requireSimpleName(): String = requireNotNull(simpleName)
 internal val hListTypeName: String = HList::class.requireSimpleName()

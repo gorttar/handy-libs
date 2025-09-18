@@ -6,7 +6,7 @@ package org.gorttar.data.heterogeneous.list
 
 import assertk.assertThat
 import assertk.assertions.isEqualTo
-import assertk.assertions.isSameAs
+import assertk.assertions.isSameInstanceAs
 import org.junit.jupiter.api.Test
 
 // @formatter:off
@@ -15,7 +15,7 @@ class LiteralsKtTest {
     @Test
     fun `0 args literal`() = assertThat(
         hListOf()
-    ).isSameAs(xs0)
+    ).isSameInstanceAs(xs0)
 
     @Test
     fun `1  args literal`() = assertThat(

@@ -12,7 +12,7 @@ internal fun generateLiteralsTest(): Unit = writeTestSrc(
     """
     |import assertk.assertThat
     |import assertk.assertions.isEqualTo
-    |import assertk.assertions.isSameAs
+    |import assertk.assertions.isSameInstanceAs
     |import ${testKClass.qualifiedName}
     |
     |// @formatter:off
@@ -21,7 +21,7 @@ internal fun generateLiteralsTest(): Unit = writeTestSrc(
     |    @${testKClass.simpleName}
     |    fun `0 args literal`() = assertThat(
     |        hListOf()
-    |    ).isSameAs(xs0)
+    |    ).isSameInstanceAs(xs0)
     |
     |${
             (minPropName..maxPropName).joinToString("\n\n") { lastPropName ->
