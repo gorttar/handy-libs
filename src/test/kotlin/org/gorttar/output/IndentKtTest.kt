@@ -1,6 +1,6 @@
 package org.gorttar.output
 
-import org.gorttar.test.io.IOScenario.Companion.runIOTest
+import org.gorttar.test.io.runIOTest
 import org.junit.jupiter.api.Test
 import java.io.PrintStream
 import kotlin.reflect.KProperty0
