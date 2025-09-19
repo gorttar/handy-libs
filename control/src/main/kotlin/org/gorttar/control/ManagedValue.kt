@@ -17,12 +17,12 @@ class ManagedValue<A>(
 fun <A> managed(get: () -> A, set: (A) -> Unit): ManagedValue<A> = ManagedValue(get, set)
 fun <A> managed(aProp: KMutableProperty0<A>): ManagedValue<A> = managed(aProp::get, aProp::set)
 
-inline fun <A> coManaged(
+inline fun <reified A> coManaged(
     crossinline get: () -> A,
     crossinline set: (A) -> Unit
 ): ManagedValue<HList1<A>> = managed(get = { HNil + get() }, set = { set(it.a) })
 
-inline fun <L : HList<L>, B> ManagedValue<L>.coManaged(
+inline fun <L : HList<L>, reified B> ManagedValue<L>.coManaged(
     crossinline getB: () -> B,
     crossinline setB: (B) -> Unit
 ): ManagedValue<HCons<L, B>> = managed(
@@ -30,11 +30,11 @@ inline fun <L : HList<L>, B> ManagedValue<L>.coManaged(
     set = { set(it.head); setB(it.tail) }
 )
 
-fun <A> coManaged(
+inline fun <reified A> coManaged(
     property: KMutableProperty0<A>
 ): ManagedValue<HList1<A>> = coManaged(property::get, property::set)
 
-fun <L : HList<L>, B> ManagedValue<L>.coManaged(
+inline fun <L : HList<L>, reified B> ManagedValue<L>.coManaged(
     bProperty: KMutableProperty0<B>
 ): ManagedValue<HCons<L, B>> = coManaged(bProperty::get, bProperty::set)
 

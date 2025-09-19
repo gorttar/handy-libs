@@ -1,6 +1,7 @@
 package org.gorttar.data.heterogeneous.list.generators
 
 import org.gorttar.data.heterogeneous.list.HCons
+import org.gorttar.data.heterogeneous.list.HList
 import org.gorttar.data.heterogeneous.list.HNil
 import org.gorttar.data.heterogeneous.list.requireSimpleName
 import java.io.FileOutputStream
@@ -24,7 +25,7 @@ internal val PropName.ordinalStr: String get() = "$number".let { "$it${lastDigit
 internal val hConsTypeName: String = HCons::class.requireSimpleName()
 internal val hNilTypeName: String = HNil::class.requireSimpleName()
 internal val headPropName: String = HCons<*, *>::head.name
-internal val tailPropName: String = HCons<*, *>::tail.name
+internal val rawListPropName: String = HList<*>::rawList.name
 
 internal fun writeMainSrc(
     srcName: String,
@@ -52,7 +53,7 @@ internal fun writeSrc(
 
 private val packageName: String =
     ::packageName.javaField!!.declaringClass.name.replace("(\\.[^.]*){2}$".toRegex(), "")
-private val srcPath = "src/main/kotlin/$packagePath"
+private val srcPath = "data/src/main/kotlin/$packagePath"
 private val lastDigitsToOrdinalSuffix = ((2..9).asSequence().map { "$it" } + "").flatMap {
     sequenceOf("1" to "st", "2" to "nd", "3" to "rd").map { (digit, suffix) -> "$it$digit" to suffix }
 }.toMap()

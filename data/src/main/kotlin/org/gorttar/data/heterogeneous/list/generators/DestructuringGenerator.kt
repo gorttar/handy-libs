@@ -6,8 +6,7 @@ fun main(): Unit = generateDestructuring()
 
 internal fun generateDestructuring(): Unit = writeMainSrc(
     srcName = "Destructuring",
-    content =
-    """
+    content = """
     |// @formatter:off
     |
     |${
@@ -16,20 +15,21 @@ internal fun generateDestructuring(): Unit = writeMainSrc(
             val typesBefore = (minPropName until propName).map { "*" } + typeName
             val propNumber = propName.number
             val funName = "component$propNumber"
+            val propIndex = propNumber - 1
             """
             |/** $funName of [$hListTypeName$propNumber]..[$hListTypeName$maxPropNumber] */
             |@JvmName("$propName$propNumber")
-            |inline operator fun <$typeName> $hListTypeName$propNumber<${typesBefore.joinToString()}>
-            |        .$funName(): $typeName = $tailPropName
+            |inline operator fun <reified $typeName> $hListTypeName$propNumber<${typesBefore.joinToString()}>
+            |        .$funName(): $typeName = $rawListPropName[$propIndex] as $typeName
             |${
-                (propName until maxPropName).joinToString("\n") {
+                (propName ..< maxPropName).joinToString("\n") {
                     val listArity = it.number + 1
                     val typesStr = (typesBefore + (propName..it).map { "*" }).joinToString()
                     """
                     |
                     |@JvmName("$propName$listArity")
-                    |inline operator fun <$typeName> $hListTypeName$listArity<$typesStr>
-                    |        .$funName(): $typeName = $headPropName.$funName()
+                    |inline operator fun <reified $typeName> $hListTypeName$listArity<$typesStr>
+                    |        .$funName(): $typeName = $rawListPropName[$propIndex] as $typeName
                     """.trimMargin()
                 }
             }""".trimMargin()
@@ -37,9 +37,5 @@ internal fun generateDestructuring(): Unit = writeMainSrc(
     }
     |// @formatter:on
     |
-    |""".trimMargin(),
-    fileHeader = """
-    |@file:Suppress("NOTHING_TO_INLINE")
-    |
-    """.trimMargin()
+    |""".trimMargin()
 )

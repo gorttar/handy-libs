@@ -11,7 +11,7 @@ import kotlin.reflect.KClass
  */
 sealed class HList<out L : HList<L>> {
     val size: Int get() = rawList.size
-    abstract val rawList: List<Any?>
+    abstract val rawList: List<*>
 
     override fun equals(other: Any?): Boolean = this === other || other is HList<*> && rawList == other.rawList
     override fun hashCode(): Int = rawList.hashCode()
@@ -22,8 +22,42 @@ sealed class HList<out L : HList<L>> {
  * Empty [HList]
  */
 object HNil : HList<HNil>() {
-    override val rawList: List<Any?> = emptyList()
+    override val rawList: List<Nothing> = emptyList()
 }
+
+/**
+ * [HList] left sub listed node constructor
+ * *    values are stored in [HCons.tail] (right part) while consecutive sub lists in [HCons.head] (left part)
+ * *    It's more convenient from usage perspective than right sub listed heterogeneous list
+ * *    because operators and infix functions in Kotlin are grouped from left to right.
+ * *    For example a + b + c + d actually means ((a + b) + c) + d
+ * *    so left sub listing can eliminate brackets in list construction expressions
+ * [head] - consecutive sub list
+ * [tail] - node value
+ */
+class HCons<out L : HList<L>, out A>(val head: L, val tail: A) : HList<HCons<L, A>>() {
+    private var isTail = true
+    private val chunk: MutableList<Any?> = run {
+        if (head is HCons<*, *> && head.isTail) head.chunk.also { head.isTail = false }
+        else ChunkedList(head.rawList)
+    }.apply { add(tail) }
+
+    override val rawList: List<*> = ListView(chunk)
+}
+
+fun <L : HList<L>, A> HCons<L, *>.copy(tail: A): HCons<L, A> = HCons(head, tail)
+
+inline fun <L : HList<L>, reified A> HCons<*, A>.copy(head: L): HCons<L, A> = HCons(head, tail)
+
+fun <L : HList<L>, A> HCons<L, A>.copy(): HCons<L, A> = this
+
+/**
+ * creates [HList] by appending [a] to [this]
+ */
+inline operator fun <L : HList<L>, A> L.plus(a: A): HCons<L, A> = HCons(this, a)
+
+internal fun KClass<*>.requireSimpleName(): String = requireNotNull(simpleName)
+internal val hListTypeName: String = HList::class.requireSimpleName()
 
 private class ListView<out T>(
     private val delegate: List<T>,
@@ -51,43 +85,3 @@ private class ChunkedList<T>(
     override fun removeAt(index: Int): T = chunk.removeAt(index.chunkIndex())
     override fun set(index: Int, element: T): T = chunk.set(index.chunkIndex(), element)
 }
-
-/**
- * [HList] left sub listed node constructor
- * *    values are stored in [HCons.tail] (right part) while consecutive sub lists in [HCons.head] (left part)
- * *    It's more convenient from usage perspective than right sub listed heterogeneous list
- * *    because operators and infix functions in Kotlin are grouped from left to right.
- * *    For example a + b + c + d actually means ((a + b) + c) + d
- * *    so left sub listing can eliminate brackets in list construction expressions
- * [head] - consecutive sub list
- * [tail] - node value
- */
-class HCons<out L : HList<L>, out A>(val head: L, tail: A) : HList<HCons<L, A>>() {
-    private var isTail = true
-    private val _chunk: MutableList<Any?> = when (val h = head as HList<*>) {
-        is HCons<*, *> -> h.chunk
-        is HNil -> ChunkedList()
-    }
-        .apply { add(tail) }
-
-    private val chunk: MutableList<Any?> get() = if (isTail) _chunk.also { isTail = false } else ChunkedList(rawList)
-
-    override val rawList: List<Any?> = ListView(_chunk)
-
-    @Suppress("UNCHECKED_CAST")
-    val tail: A get() = rawList.last() as A
-}
-
-fun <L : HList<L>, A> HCons<L, *>.copy(tail: A): HCons<L, A> = HCons(head, tail)
-
-fun <L : HList<L>, A> HCons<*, A>.copy(head: L): HCons<L, A> = HCons(head, tail)
-
-fun <L : HList<L>, A> HCons<L, A>.copy(): HCons<L, A> = this
-
-/**
- * creates [HList] by appending [a] to [this]
- */
-inline operator fun <L : HList<L>, A> L.plus(a: A): HCons<L, A> = HCons(this, a)
-
-internal fun KClass<*>.requireSimpleName(): String = requireNotNull(simpleName)
-internal val hListTypeName: String = HList::class.requireSimpleName()
