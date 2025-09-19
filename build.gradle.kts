@@ -31,22 +31,11 @@ repositories {
 }
 
 dependencies {
-    implementation(kotlin("reflect"))
+    implementation(project(":turtle"))
     implementation(kotlin("test"))
-    implementation(group = "com.willowtreeapps.assertk", name = "assertk", version = "0.28.1")
 
-    implementation(group = "org.junit.jupiter", name = "junit-jupiter-api", version = jUnitVersion)
-    runtimeOnly(group = "org.junit.jupiter", name = "junit-jupiter-engine", version = jUnitVersion)
-}
-
-buildscript {
-    repositories {
-        mavenCentral()
-    }
-    dependencies {
-        classpath(group = "org.junit.jupiter", name = "junit-jupiter-api", version = "5.6.2")
-        classpath(group = "org.jetbrains.kotlin", name = "kotlin-gradle-plugin", version = "1.9.22")
-    }
+    testImplementation(project(":testing"))
+    testImplementation(group = "com.willowtreeapps.assertk", name = "assertk", version = "0.28.1")
 }
 
 tasks {

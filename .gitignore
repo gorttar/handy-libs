@@ -19,6 +19,7 @@ hs_err_pid*
 
 /.gradle/
 /build/
+*/build/
 /out/
 /.idea/
 /secret-keys.gpg
